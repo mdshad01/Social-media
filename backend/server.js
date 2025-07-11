@@ -12,10 +12,12 @@ app.use(express.json());
 const postRoutes = require("./routers/postRouter");
 const userRoutes = require("./routers/userRouter");
 const likeRoutes = require("./routers/likeRouter");
+const commentRoutes = require("./routers/commentRouter");
 
 app.use("/api/posts", postRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/likes", likeRoutes);
+app.use("/api/comments", commentRoutes);
 
 mongoose
   .connect(`${process.env.MONGO_URI}`)

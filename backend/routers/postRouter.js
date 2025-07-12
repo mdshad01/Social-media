@@ -22,10 +22,13 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
+  const { authorId } = req.query;
+
   try {
-    const posts = await Post.find().sort({ createdAt: -1 });
+    const filter = authorId ? { authorId } : {};
+    const posts = await Post.find(filter).sort({ createdAt: -1 });
     res.json(posts);
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({ error: "Failed to fetch posts" });
   }
 });

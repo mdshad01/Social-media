@@ -2,14 +2,36 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 
-// Create new user
+// ✅ Get user by Clerk ID
+router.get("/:clerkId", async (req, res) => {
+  try {
+    const user = await User.findOne({ clerkId: req.params.clerkId });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ✅ Get user by username
+router.get("/by-username/:username", async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ✅ Create new user (on first Clerk login)
 router.post("/", async (req, res) => {
   const { clerkId, username, avatar, cover, name, description, city, school, work, website } = req.body;
 
   try {
     const existingUser = await User.findOne({ clerkId });
     if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
+      return res.status(200).json(existingUser); // ✅ return existing user if found
     }
 
     const newUser = new User({
@@ -23,6 +45,7 @@ router.post("/", async (req, res) => {
       school,
       work,
       website,
+      createdAt: new Date(),
     });
 
     const savedUser = await newUser.save();
@@ -32,14 +55,59 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get user by username
-router.get("/:username", async (req, res) => {
+// ✅ Follow a user
+router.post("/follow", async (req, res) => {
+  const { currentUserId, targetUserId } = req.body;
+
   try {
-    const user = await User.findOne({ username: req.params.username });
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    if (currentUserId === targetUserId) {
+      return res.status(400).json({ error: "You can't follow yourself." });
+    }
+
+    const currentUser = await User.findOne({ clerkId: currentUserId });
+    const targetUser = await User.findOne({ clerkId: targetUserId });
+
+    if (!currentUser || !targetUser) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    if (targetUser.followers.includes(currentUserId)) {
+      return res.status(400).json({ error: "Already following." });
+    }
+
+    targetUser.followers.push(currentUserId);
+    currentUser.following.push(targetUserId);
+
+    await targetUser.save();
+    await currentUser.save();
+
+    res.json({ message: "Followed successfully." });
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Follow failed", details: err });
+  }
+});
+
+// ✅ Unfollow a user
+router.post("/unfollow", async (req, res) => {
+  const { currentUserId, targetUserId } = req.body;
+
+  try {
+    const currentUser = await User.findOne({ clerkId: currentUserId });
+    const targetUser = await User.findOne({ clerkId: targetUserId });
+
+    if (!currentUser || !targetUser) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    targetUser.followers = targetUser.followers.filter((id) => id !== currentUserId);
+    currentUser.following = currentUser.following.filter((id) => id !== targetUserId);
+
+    await targetUser.save();
+    await currentUser.save();
+
+    res.json({ message: "Unfollowed successfully." });
+  } catch (err) {
+    res.status(500).json({ error: "Unfollow failed", details: err });
   }
 });
 

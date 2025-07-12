@@ -1,83 +1,39 @@
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
+
+interface Post {
+  mediaUrl: string;
+  _id: string;
+}
 
 const UserMediaCart = ({ userId }: { userId: string }) => {
+  const [media, setMedia] = useState<Post[]>([]);
+
+  useEffect(() => {
+    const fetchMedia = async () => {
+      const res = await fetch(`http://localhost:5000/api/posts?authorId=${userId}`);
+      const data = await res.json();
+      setMedia(data.filter((post: Post) => post.mediaUrl)); // only posts with media
+    };
+
+    if (userId) fetchMedia();
+  }, [userId]);
+
   return (
     <div className="p-4 bg-white rounded-lg shadow-md text-sm">
-      {/* TOP */}
       <div className="flex items-center justify-between font-medium">
         <span className="text-gray-500">User Media</span>
-        <Link href="/" className="text-blue-500 text-xs">
-          See all
-        </Link>
       </div>
-      {/* BOTTOM */}
+
       <div className="flex flex-wrap mt-4 justify-between gap-4">
-        <div className="relative w-1/5 h-24">
-          <Image
-            src="https://images.pexels.com/photos/32529987/pexels-photo-32529987.jpeg"
-            alt=""
-            fill
-            className="object-cover rounded-md"
-          />
-        </div>
-        <div className="relative w-1/5 h-24">
-          <Image
-            src="https://images.pexels.com/photos/32529987/pexels-photo-32529987.jpeg"
-            alt=""
-            fill
-            className="object-cover rounded-md"
-          />
-        </div>
-        <div className="relative w-1/5 h-24">
-          <Image
-            src="https://images.pexels.com/photos/32529987/pexels-photo-32529987.jpeg"
-            alt=""
-            fill
-            className="object-cover rounded-md"
-          />
-        </div>
-        <div className="relative w-1/5 h-24">
-          <Image
-            src="https://images.pexels.com/photos/32529987/pexels-photo-32529987.jpeg"
-            alt=""
-            fill
-            className="object-cover rounded-md"
-          />
-        </div>
-        <div className="relative w-1/5 h-24">
-          <Image
-            src="https://images.pexels.com/photos/32529987/pexels-photo-32529987.jpeg"
-            alt=""
-            fill
-            className="object-cover rounded-md"
-          />
-        </div>
-        <div className="relative w-1/5 h-24">
-          <Image
-            src="https://images.pexels.com/photos/32529987/pexels-photo-32529987.jpeg"
-            alt=""
-            fill
-            className="object-cover rounded-md"
-          />
-        </div>
-        <div className="relative w-1/5 h-24">
-          <Image
-            src="https://images.pexels.com/photos/32529987/pexels-photo-32529987.jpeg"
-            alt=""
-            fill
-            className="object-cover rounded-md"
-          />
-        </div>
-        <div className="relative w-1/5 h-24">
-          <Image
-            src="https://images.pexels.com/photos/32529987/pexels-photo-32529987.jpeg"
-            alt=""
-            fill
-            className="object-cover rounded-lg"
-          />
-        </div>
+        {media.slice(0, 8).map((post) => (
+          <div key={post._id} className="relative w-1/5 h-24">
+            <Image src={post.mediaUrl} alt="media" fill className="object-cover rounded-md" />
+          </div>
+        ))}
+        {media.length === 0 && <span className="text-gray-400 text-sm mt-4">No media uploaded yet.</span>}
       </div>
     </div>
   );

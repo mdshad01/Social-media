@@ -2,16 +2,31 @@
 
 import Image from "next/image";
 import { UserResource } from "@clerk/types";
+import UserInfoCart from "./UserInfoCart";
+import { useEffect } from "react";
 
-const UserHeader = ({ user }: { user: UserResource }) => {
+const UserHeader = ({
+  user,
+  coverUrl,
+  onCoverChange,
+}: {
+  user: UserResource;
+  coverUrl?: string;
+  onCoverChange?: (newUrl: string) => void;
+}) => {
+  useEffect(() => {
+    console.log("🔄 UserHeader received updated coverUrl:", coverUrl);
+  }, [coverUrl]);
+
   return (
     <div className="flex flex-col items-center justify-center gap-4">
       <div className="relative h-60 w-full">
         <Image
-          src="https://images.pexels.com/photos/32637548/pexels-photo-32637548.jpeg"
+          src={coverUrl || "https://images.pexels.com/photos/32637548/pexels-photo-32637548.jpeg"}
           alt="Cover"
           fill
-          className="rounded-md object-cover"
+          sizes="100vw"
+          className="rounded-md object-cover transition-all duration-300"
         />
         <Image
           src={user.imageUrl}
@@ -22,7 +37,8 @@ const UserHeader = ({ user }: { user: UserResource }) => {
         />
       </div>
       <span className="text-2xl font-semibold mt-16 mb-2">{user.fullName}</span>
-      {/* follower/following etc. */}
+
+      <UserInfoCart userId={user.id} currentUserId={user.id} onCoverChange={onCoverChange} />
     </div>
   );
 };

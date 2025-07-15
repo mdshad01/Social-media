@@ -1,46 +1,41 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import UserHeader from "@/src/components/UserHeader";
 
 const UserProfileShell = ({ setUserId }: { setUserId: (id: string) => void }) => {
   const { user, isLoaded } = useUser();
+  const [coverUrl, setCoverUrl] = useState<string>("");
 
   useEffect(() => {
-    console.log("🟡 useEffect running...");
-    console.log("Clerk Loaded:", isLoaded, "User:", user);
-
     const syncUserToBackend = async () => {
       if (!user) return;
 
-      console.log("🟢 Sending POST to /api/users with:", user);
-
       try {
-        const res = await fetch("http://localhost:5000/api/users", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            clerkId: user.id,
-            username: user.username || user.id,
-            name: user.fullName,
-            avatar: user.imageUrl,
-            cover: "",
-            description: "",
-            city: "",
-            school: "",
-            work: "",
-            website: "",
-          }),
-        });
+        const check = await fetch(`http://localhost:5000/api/users/${user.id}`);
+        const existing = check.ok ? await check.json() : null;
 
-        if (!res.ok) {
-          console.error("❌ Request failed:", await res.text());
-        } else {
-          console.log("✅ User synced to backend!");
-        }
+        setCoverUrl(existing?.cover || "");
+
+        const payload = {
+          clerkId: user.id,
+          username: user.username || user.id,
+          name: user.fullName,
+          avatar: user.imageUrl,
+          cover: existing?.cover || "",
+          description: existing?.description || "",
+          city: existing?.city || "",
+          school: existing?.school || "",
+          work: existing?.work || "",
+          website: existing?.website || "",
+        };
+
+        await fetch("http://localhost:5000/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
       } catch (err) {
         console.error("❌ Request error:", err);
       }
@@ -54,7 +49,19 @@ const UserProfileShell = ({ setUserId }: { setUserId: (id: string) => void }) =>
 
   if (!isLoaded || !user) return <div>Loading...</div>;
 
-  return <UserHeader user={user} />;
+  return (
+    <div className="relative">
+      {/* <UserHeader user={user} coverUrl={coverUrl} onCoverChange={setCoverUrl} /> */}
+      <UserHeader
+        user={user}
+        coverUrl={coverUrl}
+        onCoverChange={(newUrl) => {
+          console.log("🔄 Updating coverUrl to:", newUrl);
+          setCoverUrl(newUrl); // triggers re-render of UserHeader
+        }}
+      />
+    </div>
+  );
 };
 
 export default UserProfileShell;

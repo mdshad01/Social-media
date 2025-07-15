@@ -2,7 +2,20 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["img.clerk.com", "images.pexels.com", "www.pexels.com"], // ✅ all together
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "img.clerk.com", // ✅ Clerk avatars
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com", // ✅ default Cloudinary domain
+      },
+      {
+        protocol: "https",
+        hostname: "images.pexels.com", // if still used as fallback
+      },
+    ],
   },
 };
 

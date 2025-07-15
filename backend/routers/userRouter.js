@@ -2,7 +2,18 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 
-// ✅ Get user by Clerk ID
+// ✅ Get user by username
+router.get("/by-username/:username", async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ✅ Add this to support GET /api/users/:clerkId
 router.get("/:clerkId", async (req, res) => {
   try {
     const user = await User.findOne({ clerkId: req.params.clerkId });
@@ -13,14 +24,15 @@ router.get("/:clerkId", async (req, res) => {
   }
 });
 
-// ✅ Get user by username
-router.get("/by-username/:username", async (req, res) => {
+// ✅ Update user profile info by Clerk ID
+router.put("/:clerkId", async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.params.username });
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    const updatedUser = await User.findOneAndUpdate({ clerkId: req.params.clerkId }, { $set: req.body }, { new: true });
+    if (!updatedUser) return res.status(404).json({ error: "User not found" });
+    res.json(updatedUser);
+    console.log("🟡 Update payload:", req.body);
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Update failed", details: err });
   }
 });
 

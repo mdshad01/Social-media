@@ -1,7 +1,7 @@
-// "use client";
+"use client";
 
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Comments from "./Comments";
 import { PostTypeWithAuthor } from "@/types/post";
 

@@ -2,7 +2,7 @@
 
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import UserHeader from "@/src/components/UserHeader";
+import UserHeader from "./UserHeader";
 
 const UserProfileShell = ({ setUserId }: { setUserId: (id: string) => void }) => {
   const { user, isLoaded } = useUser();
@@ -52,14 +52,7 @@ const UserProfileShell = ({ setUserId }: { setUserId: (id: string) => void }) =>
   return (
     <div className="relative">
       {/* <UserHeader user={user} coverUrl={coverUrl} onCoverChange={setCoverUrl} /> */}
-      <UserHeader
-        user={user}
-        coverUrl={coverUrl}
-        onCoverChange={(newUrl) => {
-          console.log("🔄 Updating coverUrl to:", newUrl);
-          setCoverUrl(newUrl); // triggers re-render of UserHeader
-        }}
-      />
+      <UserHeader user={user} coverUrl={coverUrl} />
     </div>
   );
 };

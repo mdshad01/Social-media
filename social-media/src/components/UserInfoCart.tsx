@@ -35,10 +35,6 @@ const UserInfoCart = ({
   const isOwnProfile = userId === currentUserId;
 
   useEffect(() => {
-    console.log("🧩 onCoverChange in UserInfoCart is:", typeof onCoverChange);
-  }, []);
-
-  useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await fetch(`http://localhost:5000/api/users/${userId}`);
@@ -71,12 +67,13 @@ const UserInfoCart = ({
       setEditMode(false);
 
       console.log("✅ Cover in DB:", updated.cover);
-      console.log("📤 onCoverChange firing:", !!onCoverChange);
+      console.log("📤 onCoverChange firing:", typeof onCoverChange, onCoverChange);
 
-      // Ensure we force update cover
-      if (onCoverChange && updated.cover) {
+      if (typeof onCoverChange === "function" && updated.cover) {
         console.log("📤 Triggering cover update:", updated.cover);
-        onCoverChange(updated.cover); // ← this updates the header image
+        onCoverChange(updated.cover); // ✅ this will now run
+      } else {
+        console.warn("⚠️ onCoverChange not available or cover missing");
       }
     } catch (err) {
       console.error("❌ Failed to update user", err);

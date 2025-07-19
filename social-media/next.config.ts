@@ -5,15 +5,15 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "res.cloudinary.com", // ✅ Cloudinary
+      },
+      {
+        protocol: "https",
         hostname: "img.clerk.com", // ✅ Clerk avatars
       },
       {
         protocol: "https",
-        hostname: "res.cloudinary.com", // ✅ default Cloudinary domain
-      },
-      {
-        protocol: "https",
-        hostname: "images.pexels.com", // if still used as fallback
+        hostname: "images.pexels.com", // optional
       },
     ],
   },

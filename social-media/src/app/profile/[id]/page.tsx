@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Feed from "@/src/components/Feed";
-import LeftMenu from "@/src/components/LeftMenu";
-import RightMenu from "@/src/components/RightMenu";
-import UserProfileShell from "@/src/components/UserProfileShell";
+import Feed from "@/components/Feed";
+import LeftMenu from "@/components/LeftMenu";
+import UserProfileShell from "@/components/UserProfileShell";
+import RightMenu from "@/components/RightMenu";
 
 const ProfilePage = () => {
   const [userId, setUserId] = useState<string>("");

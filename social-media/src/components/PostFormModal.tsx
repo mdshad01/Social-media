@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const PostFormModal = ({ user, onClose }: { user: any; onClose: () => void }) => {
   const [type, setType] = useState<"text" | "photo" | "video" | "poll" | "event">("text");
@@ -8,6 +9,7 @@ const PostFormModal = ({ user, onClose }: { user: any; onClose: () => void }) =>
   const [media, setMedia] = useState<string | null>(null);
   const [poll, setPoll] = useState({ option1: "", option2: "" });
   const [event, setEvent] = useState({ title: "", date: "" });
+  const router = useRouter();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -20,14 +22,28 @@ const PostFormModal = ({ user, onClose }: { user: any; onClose: () => void }) =>
     }
   };
 
+  // NEW: Function to trigger file input with reset
+  const triggerFileInput = (mediaType: "photo" | "video") => {
+    setType(mediaType);
+
+    // Reset the file input value to ensure fresh file dialog
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    // Small delay to ensure the reset happens before click
+    setTimeout(() => {
+      fileInputRef.current?.click();
+    }, 10);
+  };
+
   const handleSubmit = async () => {
     const postData: any = {
       type,
-      description: content, // ✅ correct
+      description: content,
       authorId: user.id,
     };
 
-    // Upload image/video if needed
     const file = fileInputRef.current?.files?.[0];
     if ((type === "photo" || type === "video") && file) {
       try {
@@ -52,6 +68,7 @@ const PostFormModal = ({ user, onClose }: { user: any; onClose: () => void }) =>
       if (!res.ok) throw new Error("❌ Post upload failed");
       console.log("✅ Post created!");
       onClose();
+      router.refresh();
     } catch (err) {
       console.error("🚨 Error submitting post:", err);
     }
@@ -60,7 +77,7 @@ const PostFormModal = ({ user, onClose }: { user: any; onClose: () => void }) =>
   const uploadToCloudinary = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "socialmedia_unsigned"); // Replace with your preset
+    formData.append("upload_preset", "socialmedia_unsigned");
 
     const res = await fetch("https://api.cloudinary.com/v1_1/dqnwkn9rl/upload", {
       method: "POST",
@@ -81,7 +98,6 @@ const PostFormModal = ({ user, onClose }: { user: any; onClose: () => void }) =>
           &times;
         </button>
 
-        {/* TEXTAREA */}
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
@@ -89,7 +105,6 @@ const PostFormModal = ({ user, onClose }: { user: any; onClose: () => void }) =>
           className="w-full p-3 rounded-md border border-gray-300 md:h-[30vh] focus:outline-none resize-none min-h-[100px] text-sm"
         />
 
-        {/* CONDITIONAL FIELDS */}
         {type === "photo" && media && (
           <Image src={media} alt="Preview" width={500} height={250} className="rounded-md mt-4" />
         )}
@@ -130,16 +145,16 @@ const PostFormModal = ({ user, onClose }: { user: any; onClose: () => void }) =>
           </div>
         )}
 
-        {/* FILE UPLOADER */}
+        {/* FILE UPLOADER - Updated accept attribute */}
         <input
           type="file"
-          accept={type === "photo" ? "image/*" : "video/*"}
+          accept={type === "photo" ? "image/*" : type === "video" ? "video/*" : "*"}
           hidden
           ref={fileInputRef}
           onChange={handleMediaSelect}
         />
 
-        {/* ICONS + SUBMIT */}
+        {/* ICONS + SUBMIT - Updated click handlers */}
         <div className="flex justify-between items-center mt-4 md:mt-6 lg:mt-6 border-t pt-3 lg:pt-6 flex-wrap gap-y-2">
           <div className="flex gap-8">
             {[
@@ -151,9 +166,10 @@ const PostFormModal = ({ user, onClose }: { user: any; onClose: () => void }) =>
               <div
                 key={item.type}
                 onClick={() => {
-                  setType(item.type as any);
                   if (item.type === "photo" || item.type === "video") {
-                    fileInputRef.current?.click();
+                    triggerFileInput(item.type as "photo" | "video");
+                  } else {
+                    setType(item.type as any);
                   }
                 }}
                 className="relative cursor-pointer group">

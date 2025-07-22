@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface User {
   clerkId: string;
@@ -31,6 +32,7 @@ const UserInfoCart = ({
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState<Partial<User>>({});
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const isOwnProfile = userId === currentUserId;
 
@@ -97,6 +99,7 @@ const UserInfoCart = ({
       const data = await res.json();
       if (data.secure_url) {
         setFormData((prev) => ({ ...prev, cover: data.secure_url }));
+        router.refresh();
       }
     } catch (err) {
       console.error("❌ Cloudinary error", err);

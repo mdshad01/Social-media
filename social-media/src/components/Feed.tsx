@@ -1,12 +1,38 @@
-import Post from "./Post"; // This will be a client component
-import { PostType } from "@/types/post"; // define this type properly or inline it
+"use client";
 
-const Feed = async () => {
-  const res = await fetch("http://localhost:5000/api/posts", {
-    cache: "no-store",
-  });
-  const posts: PostType[] = await res.json();
+import { useEffect, useState } from "react";
+import Post from "./Post";
+import { PostType } from "../types/post";
 
+interface FeedProps {
+  posts?: PostType[]; // Make posts optional
+}
+
+const Feed = ({ posts: propPosts }: FeedProps) => {
+  const [posts, setPosts] = useState<PostType[]>(propPosts || []);
+  const [loading, setLoading] = useState(!propPosts); // Only show loading if no props provided
+
+  useEffect(() => {
+    // Only fetch if no posts were provided as props
+    if (!propPosts) {
+      const fetchPosts = async () => {
+        try {
+          const res = await fetch("http://localhost:5000/api/posts");
+          const data: PostType[] = await res.json();
+          setPosts(data);
+        } catch (error) {
+          console.error("Failed to fetch posts:", error);
+          setPosts([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchPosts();
+    }
+  }, [propPosts]);
+
+  if (loading) return <div>Loading posts...</div>;
   if (!posts.length) return <div>No posts yet.</div>;
 
   return (

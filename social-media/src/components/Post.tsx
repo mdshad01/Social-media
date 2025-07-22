@@ -3,7 +3,7 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import Comments from "./Comments";
-import { PostTypeWithAuthor } from "@/types/post";
+import { PostTypeWithAuthor } from "../types/post";
 
 const Post = ({ post }: { post: PostTypeWithAuthor }) => {
   const { description, mediaUrl, type, authorInfo } = post;

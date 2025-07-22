@@ -1,13 +1,15 @@
-"use client";
+// src/app/profile/[id]/page.tsx
 
-import { useState } from "react";
-import Feed from "@/components/Feed";
-import LeftMenu from "@/components/LeftMenu";
-import UserProfileShell from "@/components/UserProfileShell";
-import RightMenu from "@/components/RightMenu";
+import ClientProfileContent from "@/src/components/ClientProfileContent";
+import LeftMenu from "@/src/components/LeftMenu";
+import { PostType } from "@/src/types/post";
 
-const ProfilePage = () => {
-  const [userId, setUserId] = useState<string>("");
+const ProfilePage = async () => {
+  // Fetch posts at the server level
+  const res = await fetch("http://localhost:5000/api/posts", {
+    cache: "no-store",
+  });
+  const posts: PostType[] = await res.json();
 
   return (
     <div className="flex gap-6 pt-6">
@@ -15,16 +17,7 @@ const ProfilePage = () => {
         <LeftMenu type="profile" />
       </div>
 
-      <div className="w-full lg:w-[70%] xl:w-[50%]">
-        <div className="flex flex-col gap-6">
-          <UserProfileShell setUserId={setUserId} />
-          <Feed />
-        </div>
-      </div>
-
-      <div className="hidden xl:block w-[30%]">
-        <RightMenu userId={userId} />
-      </div>
+      <ClientProfileContent posts={posts} />
     </div>
   );
 };

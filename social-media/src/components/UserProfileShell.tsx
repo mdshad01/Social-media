@@ -51,7 +51,6 @@ const UserProfileShell = ({ setUserId }: { setUserId: (id: string) => void }) =>
 
   return (
     <div className="relative">
-      {/* <UserHeader user={user} coverUrl={coverUrl} onCoverChange={setCoverUrl} /> */}
       <UserHeader user={user} coverUrl={coverUrl} />
     </div>
   );
